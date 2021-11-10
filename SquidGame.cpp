@@ -1,64 +1,37 @@
-#include <stdlib.h>
-
-int ledPin = 13;                // choose the pin for the LED
-int inputPin = 8;               // choose the input pin (for PIR sensor)
-int pirState = LOW;             // we start, assuming no motion detected
-int val = 0;                    // variable for reading the pin status
-int buzzerPin = 10;             // Buzzer pin
-
-bool CanMove,HasLost;
-
-void static detectingMotion(void);
-
-
+ 
+int ledPin = 13;                // LED 
+int pirPin = 2;                 // PIR Out pin 
+int pirStat = 0;                   // PIR status
+int buttonPin = 8;
+bool LastStateWasOn = false;
 void setup() {
-    pinMode(ledPin, OUTPUT);      // declare LED as output
-    pinMode(inputPin, INPUT);     // declare sensor as input
-    pinMode(buzzerPin, OUTPUT);
-
-    Serial.begin(9600);
+  pinMode(ledPin, OUTPUT);     
+  pinMode(buttonPin, OUTPUT); 
+  pinMode(pirPin, INPUT);     
+ 
+  Serial.begin(9600);
 }
-
+ 
 void loop(){
-    val = digitalRead(inputPin);  // read input value
-    float num = rand() % 10;
-    if(num%2==0) {
-        detectingMotion();
-        digitalWrite(ledPin,LOW);
-    }
-    else
-        digitalWrite(ledPin,HIGH);
+  
+  pirStat = digitalRead(pirPin); Serial.println(pirPin);
+   
+  if (pirStat == HIGH) {            // if motion detected
+    digitalWrite(ledPin, HIGH);  // turn LED ON
+    //Serial.println("Hey I got you!!!");
+    if(LastStateWasOn){
+      digitalWrite(buttonPin,HIGH);
+      }
+      LastStateWasOn = true;
+      
+      
 
-    delay(1000);
-
-
-
-}
-
-void static detectingMotion(void){
-    if (val == HIGH && CanMove)	// check if the input is HIGH
-    {
-        digitalWrite(ledPin, HIGH);  // turn LED ON
-
-        if (pirState == LOW)
-        {
-            Serial.println("Motion detected!");	// print on output change
-            pirState = HIGH;
-            tone(buzzer, 1000); // Send 1KHz sound signal...
-            delay(1000);
-            noTone(buzzer);     // Stop sound...
-
-        }
-    }
-    else
-    {
-        digitalWrite(ledPin, LOW); // turn LED OFF
-
-        if (pirState == HIGH)
-        {
-            Serial.println("Motion ended!");	// print on output change
-            pirState = LOW;
-        }
-    }
-
+  } 
+  else {
+    Serial.println("You didnt move");
+    LastStateWasOn = false;
+    digitalWrite(ledPin, LOW); // turn LED OFF if we have no motion
+      digitalWrite(buttonPin,LOW);
+   
+  }delay(100);
 }
